@@ -1,0 +1,22 @@
+{
+  "name": "restify-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kind0518/node-restify-example.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kind0518/node-restify-example/issues"
+  },
+  "homepage": "https://github.com/kind0518/node-restify-example#readme",
+  "dependencies": {
+    "restify": "^7.1.1"
+  }
+}

@@ -13,5 +13,5 @@
 - `npm`은 Node Package Modules의 약자로, Node.js에서 사용가능한 모듈들을 모아놓은 창고라고 생각하면 된다.
 
 ```
-sudo npm install restify
+sudo npm install --save -global restify
 ```

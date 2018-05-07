@@ -1,0 +1,12 @@
+node_modules
+dump.rdb
+npm-debug.log
+dump
+
+# Webstorm project files
+.idea
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
