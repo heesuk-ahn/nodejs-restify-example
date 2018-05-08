@@ -17,7 +17,7 @@
   그후 완료될 때까지, 엔터만 눌러준다.
 - step 4) config.js라는 파일을 생성한 후, 아래대로 따라 코딩한다.
 
-```
+```javascript
 /*
 (information)
 
@@ -38,7 +38,7 @@ module.exports = {
 - step 5) terminal을 열고, 해당 디렉토리 경로에서 `sudo npm install restify --save`를 입력한다.
   이는 npm으로부터 모듈을 다운로드 받게 해주고, --save는 package.json 파일에 dependencies를 자동으로 추가해준다.
 
-```
+```javascript
 /*
 (information)
 - require는 다른 파일에 있는 module을 불러오게 도와준다.
@@ -61,7 +61,7 @@ server.listen(config.port, () => {
 - step 6) terminal에서 해당 디렉토리 경로에서 아래와 같은 명령어를 쳤을 때, 터미널에 `server start` 가 나오면
   서버가 정상적으로 해당 포트에 boot up되었다는 것을 알 수 있다.
 
-```
+```terminal
   node app.js
 ```
 
@@ -79,7 +79,7 @@ server.listen(config.port, () => {
 
 - step 10) package.json에 해당 스크립트를 추가한다.
 
-```
+```javascript
 "scripts": {
   "test": "node_modules/.bin/mocha $(find ./test -name '*.js') --recursive -w"
 }
@@ -89,7 +89,7 @@ server.listen(config.port, () => {
 
 - step 11) 이제 간단한 테스트를 작성해보자.
 
-```
+```javascript
 var assert = require('assert')
 
 describe('Test suit', function(){
@@ -108,12 +108,11 @@ mocha 테스트는 `describe` 함수의 첫번째에 테스트를 할 대상 주
   `npm test` 커맨드를 입력하면 된다.
 
 
-
 - test directory를 만든다.
 
 - ORM을 추가하자. ORM은 `sequelize`를 사용한다.
 
-```
+```terminal
 mack :
   1) sudo npm install sequelize --save
   2) sudo npm install pg pg-hstore --save
@@ -125,10 +124,9 @@ window (관리자 모드 실행):
   3) npm install -g sequelize-cli
 ```
 
--
 - docker-compose.yml 파일을 추가한 후, 아래 내용을 입력한다.
 
-```
+```|
 version: '2'
 services:
   postgres:
@@ -139,4 +137,4 @@ services:
       - POSTGRES_USER=root
       - POSTGRES_DB=database
       - POSTGRES_PASSWORD=root
-```
+|```
