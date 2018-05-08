@@ -17,10 +17,13 @@
   },
   "homepage": "https://github.com/kind0518/node-restify-example#readme",
   "dependencies": {
+    "bluebird": "^3.5.1",
     "mocha": "^5.1.1",
     "pg": "^7.4.3",
     "pg-hstore": "^2.3.2",
     "restify": "^7.1.1",
-    "sequelize": "^4.37.7"
+    "sequelize": "^4.37.7",
+    "sinon": "^5.0.7",
+    "supertest": "^3.0.0"
   }
 }

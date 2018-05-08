@@ -103,6 +103,33 @@ mocha 테스트는 `describe` 함수의 첫번째에 테스트를 할 대상 주
 작성한다. 위에 테스트 예시를 보면, Test suit는 OK여야 한다고 적은 것이다.
 `assert`는 TDD 테스트시에 많이 사용되는 비교함수로, 첫번째 인자와 두번째 인자가 같은지 확인한다.
 
+Q. 여기서 테스트를 통과하게 하려면 어떻게 해주면 될까? 테스트를 통과하게 바꿔보고, 실행시켜 확인해보세요.
+
+- step 12) Network 테스트는 어떻게 할까?
+
+Test를 할 때, 이런 route 테스트들은 네트워크 I/O (Input/Output)가 발생한다.
+Node.js에서는 이런 네트워크 테스트를 위한 모듈이 존재하는데, 바로 `Nock` 모듈과 `supertest` 모듈이다.
+`supertest`는 intergration test (통합 테스트)시에 쓰이는데, 실제로 서버를 띄우고, http request를
+보내주는 모듈이다. 또 request가 발생했을 때, 그 request를 받아서 처리해주는 것이 `Nock` 모듈이다.
+
+```terminal
+
+  mac : sudo npm install nock --save
+  window(관리자 모드) : npm install nock --save
+
+```
+
+- step 13) `Nock`을 이용하여 테스트를 작성해보자.
+
+```javascript
+describe('get-todo-lists'), function () {
+  it('should return todo lists'), function (done) {
+      request(app)
+  }
+}
+```
+
+
 - step 12) 작성한 테스트가 동작하는지 확인해보자. 우리가 예상하기로는 실패하여야 한다.
   왜냐면 1과 2는 엄연히 다른 숫자이기 때문이다. 실행은 해당 디렉토리 터미널에서 (/node-resify-exmaple)
   `npm test` 커맨드를 입력하면 된다.
@@ -113,7 +140,7 @@ mocha 테스트는 `describe` 함수의 첫번째에 테스트를 할 대상 주
 - ORM을 추가하자. ORM은 `sequelize`를 사용한다.
 
 ```terminal
-mack :
+mac :
   1) sudo npm install sequelize --save
   2) sudo npm install pg pg-hstore --save
   3) sudo npm install -g sequelize-cli
@@ -126,7 +153,7 @@ window (관리자 모드 실행):
 
 - docker-compose.yml 파일을 추가한 후, 아래 내용을 입력한다.
 
-```|
+```
 version: '2'
 services:
   postgres:
@@ -137,4 +164,4 @@ services:
       - POSTGRES_USER=root
       - POSTGRES_DB=database
       - POSTGRES_PASSWORD=root
-|```
+```
