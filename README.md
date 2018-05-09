@@ -330,9 +330,10 @@ server.listen(config.port, () => {
 	    process.exit();
 	  });
 });
+```
 
-
-- 위에 코드에서 아래 코드가 추가되었다. 이것은 만약 app.js 서버가 부트 업(실행)될 때, model에 정의해놓은 table들을 모두 띄우는 작업을 하는 것이다.
+- 위에 코드에서 아래 코드가 추가되었다. 이것은 만약 app.js 서버가 부트 업(실행)될 때,
+ model에 정의해놓은 table들을 모두 띄우는 작업을 하는 것이다.
 
 ```javascript
 db.sequelize.sync().then(() => {
@@ -345,6 +346,7 @@ db.sequelize.sync().then(() => {
     process.exit();
   });
 ```
+
 
 ## Todo 테이블도 만들었으니, 이번에는 Database를 조작해보자.
 
@@ -458,9 +460,114 @@ describe('createTodo', () => {
 - 위에 코드에서 테스트를 위해서 여러 모듈 라이브러리를 인스톨 했다. `sinon`과 `Promise`가 그것인데, sinon은 어떤 라이브러리를 mocking해서 그 라이브러리가 call 되면 마치 자기가 그 라이브러리인 척하면서 값을 돌려주어 코드가 진행되게 해준다. `Promise`는 잘 설명된 블로그를 소개하겠다
 참조: http://shygiants.github.io/node.js/2016/01/03/promisejs.html
 
-- 위에서 하려는 테스트는
+- 위에서 하려는 테스트는 해당 함수가 콜되었을 때, 정말 `db.Todo.create` 가 실행되는지 보기위한 테스트이다.
 
+## Api 로직의 꽃, Route를 만들어보자!
 
+- 루트 디렉토리에 `routes`를 추가하고, 그 아래 `createTodoRoute.js` 파일을 추가한다.
+
+```javascript
+const path = process.cwd();
+const createTodoHandler = require(path + '/repository/createTodo.js');
+const db = require(path + '/models');
+
+/*
+익명함수로 server 파라미터를 받는다.
+
+* 익명 함수 type 1)
+fucntion(server) {
+
+}
+
+* arrow 를 이용한 익명함수 type 2)
+server => {
+
+}
+어떤 스타일을 택할지는 본인 마음~
+
+module.exports = db => (content, userId, callback) => {
+*/
+module.exports = server => {
+  server.post('/todos', (req, res) => {
+    const data = req.body;
+    const content = data.content;
+    const userId = data.userId;
+
+    createTodoHandler(db)(content, userId, result => {
+      res.send(result);
+    })
+  });
+}
+```
+
+- 이후, app.js로 이동하여서 `Middleware`를 추가하자.
+  이 Middleware는 `resify` server에서 사용되며, 주로 json을 파싱하는 용도로 사용된다.
+
+```javascript
+/*
+(information)
+- require는 다른 파일에 있는 module을 불러오게 도와준다.
+*/
+var restify = require('restify');
+const basePath = process.cwd();
+const config = require('./config.js');
+const db = require(basePath + '/models');
+const createTodoRoute = require(basePath + '/routes/createTodoRoute.js');
+const restifyPlugins = require('restify-plugins');
+
+const server = restify.createServer({
+	name: config.name,
+	version: config.version,
+});
+
+/**
+  * Middleware
+  */
+server.use(restifyPlugins.jsonBodyParser({ mapParams: true }));
+server.use(restifyPlugins.acceptParser(server.acceptable));
+server.use(restifyPlugins.queryParser({ mapParams: true }));
+server.use(restifyPlugins.fullResponse());
+
+server.listen(config.port, () => {
+  console.log("server start!");
+  console.log("port : %d", config.port);
+
+	db.sequelize.sync().then(() => {
+	    console.log('✓ DB connection success.');
+	    console.log('  Press CTRL-C to stop\n');
+	  })
+	  .catch(err => {
+	    console.error(err);
+	    console.log('✗ DB connection error. Please make sure DB is running.');
+	    process.exit();
+	  });
+	createTodoRoute(server);
+});
+```
+
+- 위에 코드에서 또 추가된 것이 우리가 아까 생성한 `createTodoRoute` 모듈이다
+
+```javascript
+const createTodoRoute = require(basePath + '/routes/createTodoRoute.js');
+
+server.listen(config.port, () => {
+  console.log("server start!");
+  console.log("port : %d", config.port);
+
+	db.sequelize.sync().then(() => {
+	    console.log('✓ DB connection success.');
+	    console.log('  Press CTRL-C to stop\n');
+	  })
+	  .catch(err => {
+	    console.error(err);
+	    console.log('✗ DB connection error. Please make sure DB is running.');
+	    process.exit();
+	  });
+	createTodoRoute(server);
+});
+```
+
+- 이렇게 서버가 실행될 때, route도 불러서 메모리에 올려 실행되게 한다.
 
 ## Docker file 추가하기
 
@@ -489,3 +596,22 @@ services:
 docker-compose up
 ```
  위와 같은 간단한 명령어를 통해, 로컬에 데이터베이스를 띄울 수 있다.
+
+
+ ## 이제 정말 우리가 만든 API가 동작하는지 서버를 띄워보자!
+
+ - docker-compose up 명령어를 사용하여, database를 로컬에 먼저 띄운다
+
+ ```terminal
+ docker-compose up
+ ```
+ - /node-restify-example 디렉토리로 이동한 후, `app.js`를 실행한다.
+
+ ```terminal
+ node app.js
+ ```
+ - postman 앱을 실행시킨 후, 아래와 같이 설정후 요청한다.
+
+![postman](postman-example.png)
+
+ - response가 성공적으로 돌아온다면 성공!
