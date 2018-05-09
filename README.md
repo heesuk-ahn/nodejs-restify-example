@@ -32,6 +32,14 @@ Window:
 - npm init 명령어를 치게되면 해당 디렉토리에 `package.json` 파일이 생성된다.
   그후 완료될 때까지, 엔터만 눌러준다.
 
+- `package.json`이 생성되면 아래 링크에 접속하여 모든 디펜던시를 복사한다. 원래는 npm install --save 등의 명령어로 하나하나씩 해주어야 하지만, 그러려면 혈압(?)이 오를 수 있으니까 미리 완성된 코드에서 디펜던시를 가져 오도록 하자.
+
+```
+https://github.com/kind0518/node-restify-example/blob/master/package.json
+```  
+
+- package.json 파일을 복사 붙여넣기 했다면, 해당 디렉토리 (/node-resify-example)에서 `npm install`을 하면 모든 디펜던시 모듈 라이브러리들이 로드된다.
+
 - config.js라는 파일을 생성한 후, 아래대로 따라 코딩한다.
 
 ```javascript
@@ -389,6 +397,70 @@ createTodo(db)(매개변수1, 매개변수2, (result) => {
 ```
 
 위와 같이 단지 db를 매개변수들과 분리하기 위한 표현이다. (코드 스타일)
+
+
+## 우리가 짠 createTodo.js는 잘 동작할까? 테스트를 통해 확인해보자.
+
+- 이제 테스트를 짜볼것이다. 원래 TDD (이하 Test Driven Develop) 에서는 테스트 코드를 먼저 짜는것이 원칙이다.
+ 테스트 코드를 먼저 짜는 이유는, `일단 동작하는 코드`를 빠르고 작은 단위에서
+ 확신을 갖기위함이다. 좀 더 쉽게 생각하면, 아마 TDD 를 하지 않는 개발자 또는 학생의 경우에는 직접 `printf (c언어, 파이선)` 라던가 `System.out.println (자바)` 등의 출력을 직접 콘솔에 하여 내가 짜고 있는 코드에 결과값이 옳은지 확인을 할 것이다. 하지만, 만약 코드가 커지고, 하나의 서버 프레임워크가 된다면, 이러한 단순한 방법은 어렵다. 왜냐면, 서버를 run 시켜서 확인을 하는 intergration 테스트 비용은 크기 때문에, 우리는 바로바로 코드를 짜고 run을 많이 하며 컴파일러와 함께 코딩을 해야한다. (우리의 머리보다는 연산속도는 컴퓨터 머리가 좋으니까..)
+
+- `test` 디렉토리 밑에, `repository` 디렉토리를 추가하고, 그 아래에 `createTodoSpec.js`를 추가하도록 하자. 그리고 아래와 같이 코드를 입력한다.
+
+```javascript
+const path = process.cwd();
+const createTodo = require(path + '/repository/createTodo.js');
+const db = require(path + '/models');
+const sinon = require('sinon');
+const assert = require('assert');
+const Promise = require('bluebird');
+
+describe('createTodo', () => {
+
+  var sandbox, getTodoListStub;
+
+  //각 test가 실행될 때마다, 실행되는 코드는 beforeEach에 넣는다.
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+    //2번째 인자에는 함수 이름이 들어가는데, create가 호출되는 것을 stub하는 것이다.
+    createTodoStub = sandbox.stub(db.Todo, "create");
+  });
+
+  //각 test가 실행되고 난 후마다 실행되논 코드는 afterEach에 넣는다.
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  //Todo가 생성되는지 확인하는 테스트다.
+  it('should create Todo', () => {
+    const userId = 1;
+    const expectedContent = 'create content';
+
+    //이런 작업을 `stub`이라고 하는데, 해당 라이브러리가 콜되면, 아래의 오브젝트를 돌려주는 코드이다.
+    createTodoStub.returns(Promise.resolve({
+      id: 1,
+      content: 'create content',
+      userId: 1
+    }));
+
+    //실제 테스트가 진행되고 결과값과 기대값을 비교한다. 함수가 실행되고 나온 결과가 우리가 예측한 결과와 맞다면 테스트는 pass이다.
+    createTodo(db)(expectedContent, userId, result => {
+      assert.deepStrictEqual(result, {
+        id: 1,
+        content: expectedContent,
+        userId: userId
+      })
+    })
+  });
+});
+```
+
+- 위에 코드에서 테스트를 위해서 여러 모듈 라이브러리를 인스톨 했다. `sinon`과 `Promise`가 그것인데, sinon은 어떤 라이브러리를 mocking해서 그 라이브러리가 call 되면 마치 자기가 그 라이브러리인 척하면서 값을 돌려주어 코드가 진행되게 해준다. `Promise`는 잘 설명된 블로그를 소개하겠다
+참조: http://shygiants.github.io/node.js/2016/01/03/promisejs.html
+
+- 위에서 하려는 테스트는
+
+
 
 ## Docker file 추가하기
 
