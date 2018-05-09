@@ -255,6 +255,147 @@ module.exports = db;
 
 ## Database Model 정의하기
 
+- 디렉토리 `/models` 밑에 `todo.js` 파일을 추가하자. `(/models/todo.js)`
+
+- todo.js에 아래와 같이 코딩한다.
+
+```javascript
+/*
+  (information)
+  - Database 모델을 만든다.
+  - 여기서 주로 알아야 할 것은, `sequelize`를 이용하여 table을 정의하는 법이다.
+  - 아래 모델 테이블 정의에서, id는 `primaryKey`로, 유일무이한 키, 중복되지 않는 키이다.
+  - content 컬럼은 실제 내용이 입력되는 컬럼값이다.
+  - model을 정의할 때는 sequelize의 define을 이용한다.
+  - autoIncrement를 true로하면, 값이 생성될 경우, 인덱스가 1씩 늘어난다.
+
+  * 참고 사이트
+  - http://webframeworks.kr/tutorials/expressjs/expressjs_orm_one/ : ORM에 대하여 설명이 잘되어있다.
+  -
+*/
+
+module.exports = function (sequelize, DataTypes) {
+  const todo = sequelize.define('Todo', {
+    id: { field: 'id', type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+    content: { field: 'content', type: DataTypes.STRING, allowNull: true },
+    userId: { field: 'userId', type: DataTypes.INTEGER, allowNull: false }
+  }, {
+    tableName: 'todo',
+    underscored: false
+  });
+  return todo;
+};
+```
+
+- 위와 같이 코드를 입력하면, 우리는 `Todo`라는 이름의 테이블을 정의한 것이다.
+
+- 이제 `app.js`로 이동해 보도록 하자.
+
+- 기존 코드에서 아래와 같이 database 코드를 추가하도록 하자.
+
+```javascript
+/*
+(information)
+- require는 다른 파일에 있는 module을 불러오게 도와준다.
+*/
+var restify = require('restify');
+const basePath = process.cwd();
+const config = require('./config.js');
+const db = require(basePath + '/models');
+
+const server = restify.createServer({
+	name: config.name,
+	version: config.version,
+});
+
+server.listen(config.port, () => {
+  console.log("server start!");
+  console.log("port : %d", config.port);
+
+	db.sequelize.sync().then(() => {
+	    console.log('✓ DB connection success.');
+	    console.log('  Press CTRL-C to stop\n');
+	  })
+	  .catch(err => {
+	    console.error(err);
+	    console.log('✗ DB connection error. Please make sure DB is running.');
+	    process.exit();
+	  });
+});
+
+
+- 위에 코드에서 아래 코드가 추가되었다. 이것은 만약 app.js 서버가 부트 업(실행)될 때, model에 정의해놓은 table들을 모두 띄우는 작업을 하는 것이다.
+
+```javascript
+db.sequelize.sync().then(() => {
+    console.log('✓ DB connection success.');
+    console.log('  Press CTRL-C to stop\n');
+  })
+  .catch(err => {
+    console.error(err);
+    console.log('✗ DB connection error. Please make sure DB is running.');
+    process.exit();
+  });
+```
+
+## Todo 테이블도 만들었으니, 이번에는 Database를 조작해보자.
+
+- `/node-restify-exmaple` 경로에 `repository`라는 디렉토리를 추가하자. `(/node-restify-example/repository)`
+
+- 해당 경로에 `createTodo.js` 라는 파일을 생성하자. `(/node-restify-example/repository/createTodo.js)`
+
+- 아래와 같이 코드를 추가하자.
+
+```javascript
+"use strict";
+
+module.exports = db => (content, userId, callback) => {
+  const query = { content: content, userId: userId };
+  return db.Todo.create(query).then(createdTodo => {
+    callback(createdTodo);
+  });
+};
+```
+
+- 위에 코드가 상당히 어렵고 헷깔려 보일 수 있다. javascript의 EMCA6 에서는 `에로우 펑션`이라는 것이 추가 되었다. `에로우 펑션`은 `익명 함수`를 위해 만들어진 것인데, `익명 함수`는 말 그대로 `이름이 없는 함수`이다.
+
+- 개발자의 고통중 하나는 함수에 이름을 짓는 것이다. 하지만, 아무 의미가 없이 콜백을 받는다던가, 매개변수로 함수로 받아야 할 때도 항상 이름이 필요할까? 꼭 그렇지는 않을 것이다. 그래서 개발자들은 `익명 함수`라는 것을 만들었다. 시그니쳐는 아래와 같다.
+
+```javascript
+
+function(매개변수) {
+   //코드
+};
+
+```
+
+- 위와 같은 익명함수를 `에로우 펑션`으로 표현하면 아래와 같다.
+
+```javascript
+
+(매개변수) => {
+
+
+};
+```
+- 위 아래 모두 똑같은 기능을 하는 코드이다. 그렇다면, `createTodo.js` 코드에 있는 `db => (매게변수1, 매개변수2, ... , 콜백함수)` 형태는 어떤걸까?
+실제로 사용할 때 어떤식으로 사용하는지 보면 이해가 쉬울 것이다.
+
+```javascript
+createTodo(db)(매개변수1, 매개변수2, (result) => {
+  console.log(result);
+  //createTodo가 완료되며 리턴한 result 값을 콜백으로 받아와서 출력한다.
+});
+```
+
+위와 같이 단지 db를 매개변수들과 분리하기 위한 표현이다. (코드 스타일)
+
+## Docker file 추가하기
+
+- 도커는 하나의 컨테이너에 독립적인 (리눅스, 유닉스, 윈도우 등등) OS 환경을
+구성하고, 그곳에 원하는 개발환경 설정을 통한 패키징을 통해 개발의 배포 작업을 간편하게 해주는 소프트웨어이다.
+ 배포에서도 사용하지만, 테스트 환경을 구성하기 위해서 사용하기도 하는데, 우리는 Database 테스트를 위해서 로컬에 Database 구성하는 것을 Docker를 이용하여 해보도록하자. (Docker에 대해서는 좀 더 공부해보시길 추천합니다.)
+
 - docker-compose.yml 파일을 추가한 후, 아래 내용을 입력한다.
 
 ```
@@ -269,3 +410,10 @@ services:
       - POSTGRES_DB=database
       - POSTGRES_PASSWORD=root
 ```
+
+- 위에 파일을 살펴보면, 환경변수를 추가하고, psotgres:9.5.4 데이터베이스를 포트 7432에 띄운다는 docker 컨텐트이다. 우리는 이것을 해당 파일이 있는 디렉토리에서
+
+```terminal
+docker-compose up
+```
+ 위와 같은 간단한 명령어를 통해, 로컬에 데이터베이스를 띄울 수 있다.
