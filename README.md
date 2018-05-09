@@ -7,20 +7,32 @@
 - Node.js에서 유명한 Express module에서도 Restful API를 지원하지만,
 웹 서버기 때문에, RestFul API를 제외한 View단도 지원하므로, 단지 Restful API만을 위해서는 사용하기에 무겁다.
 
-## restify 서버 만들기
+## restify 서버를 실행시켜보자.
 
 - 기본적으로 Node.js와 Atom이 컴퓨터 설치되어 있다는 가정하에 진행한다.
+  우리는 아무것도 없는 상태에서 API 서버 아키텍쳐를 설계하고 만들 것이다.
 
-- 우리는 아무것도 없는 상태에서 restify 서버를 만들 것이다.
+- Desktop 경로에 node-restify-example 이라는 폴더를 생성한다.
 
-- step 1) Desktop 경로에 node-restify-example 이라는 폴더를 생성한다.
+- 콘솔에서 해당 폴더로 들어가서 `npm init`을 쳐준다
 
-- step 2) 콘솔에서 해당 폴더로 들어가서 `npm init`을 쳐준다
+```terminal
 
-- step 3) npm init 명령어를 치게되면 해당 디렉토리에 `package.json` 파일이 생성된다.
+Mac :
+ - ls : 현재 디렉토리에 있는 파일들을 보여준다
+ - cd : cd 폴더명 을 입력하면 해당 폴더로 들어갈 수 있다.
+        cd .. 을 입력하면 현재 폴더에서 상위 폴더로 나갈 수 있다.
+
+Window:
+  - dir : 현재 디렉토리에 있는 파일들을 보여준다
+  - cd : cd 폴더명을 입력하면 해당 폴더로 들어갈 수 있다.
+          cd .. 을 입력하면 현재 폴더에서 상위 폴더로 나갈 수 있다.          
+```
+
+- npm init 명령어를 치게되면 해당 디렉토리에 `package.json` 파일이 생성된다.
   그후 완료될 때까지, 엔터만 눌러준다.
 
-- step 4) config.js라는 파일을 생성한 후, 아래대로 따라 코딩한다.
+- config.js라는 파일을 생성한 후, 아래대로 따라 코딩한다.
 
 ```javascript
 /*
@@ -41,8 +53,10 @@ module.exports = {
 };
 ```
 
-- step 5) terminal을 열고, 해당 디렉토리 경로에서 `sudo npm install restify --save`를 입력한다.
+- terminal을 열고, 해당 디렉토리 경로에서 `sudo npm install restify --save`를 입력한다.
   이는 npm으로부터 모듈을 다운로드 받게 해주고, --save는 package.json 파일에 dependencies를 자동으로 추가해준다.
+
+- `app.js`라는 파일을 만들어 준다. 해당 파일 안에 아래와 같이 코딩한다. `app.js`는 앱 그 자체로서, 모든 코드가 모이고, 실행되는 객체이다.
 
 ```javascript
 /*
@@ -64,26 +78,28 @@ server.listen(config.port, () => {
 
 ```
 
-- step 6) terminal에서 해당 디렉토리 경로에서 아래와 같은 명령어를 쳤을 때, 터미널에 `server start` 가 나오면
+- terminal에서 해당 디렉토리 경로에서 아래와 같은 명령어를 쳤을 때, 터미널에 `server start` 가 나오면
   서버가 정상적으로 해당 포트에 boot up되었다는 것을 알 수 있다.
 
 ```terminal
   node app.js
+
+  //node engine으로 app.js를 run 시키는 것이다.
 ```
 
-- step 7) step 6를 통해서 app이 정상적으로 3000번 포트에 물린것을 확인했다면, 해당 터미널을 종료 후에,
+- 위에 작업을 통해서 app이 정상적으로 3000번 포트에 물린것을 확인했다
   다시 Atom으로 와서 이번에는 `routes` 라는 디렉토리를 생성한다.
 
-- step 8) routes 밑에 `createTodoRoute.js` 라는 파일을 생성한다. 경로는 `routes/createTodoRoute.js`가 될 것이다.
+- routes 밑에 `createTodoRoute.js` 라는 파일을 생성한다. 경로는 `routes/createTodoRoute.js`가 될 것이다.
 
-- step 9) 이제 test를 위한 모듈을 추가할 것이다. 우리가 사용할 모듈은 `mocha`이다.
+- 이제 test를 위한 모듈을 추가할 것이다. 우리가 사용할 모듈은 `mocha`이다.
 
 ```
   mac : sudo npm install mocha --save
   window : npm install mocha -- save (관리자 모드로 명령프롬포트 실행)
 ```
 
-- step 10) package.json에 해당 스크립트를 추가한다.
+- package.json에 해당 스크립트를 추가한다.
 
 ```javascript
 "scripts": {
@@ -93,7 +109,7 @@ server.listen(config.port, () => {
 위에 스크립트는 `mocha` test를 실행할 때 사용되는 스크립트이다. 위에 -w 옵션은 watcher 옵션으로
 테스트가 변경되면 즉각적으로 테스트 성공? 실패?에 대해서 모니터링이 가능하다.
 
-- step 11) test 라는 폴더를 생성한다 (`node-resify-example/test`).
+- test 라는 폴더를 생성한다 (`node-resify-example/test`).
 그 후, test 폴더에 test1.js라는 파일을 만들어 간단한 테스트를 진행해보자.
 
 ```javascript
@@ -112,9 +128,8 @@ mocha 테스트는 `describe` 함수의 첫번째에 테스트를 할 대상 주
 
 Q. 여기서 테스트를 통과하게 하려면 어떻게 해주면 될까? 테스트를 통과하게 바꿔보고, 실행시켜 확인해보세요.
 
-- step 12) 작성한 테스트가 동작하는지 확인해보자. 우리가 예상하기로는 실패하여야 한다.
-  왜냐면 1과 2는 엄연히 다른 숫자이기 때문이다. 실행은 해당 디렉토리 터미널에서 (/node-resify-exmaple)
-  `npm test` 커맨드를 입력하면 된다.
+- 작성한 테스트가 동작하는지 확인해보자. 우리가 예상하기로는 실패하여야 한다.
+  왜냐면 1과 2는 엄연히 다른 숫자이기 때문이다. 실행은 해당 디렉토리 터미널에서 (/node-resify-exmaple) `npm test` 커맨드를 입력하면 된다.
 
 ## Database Set up 하기
 
@@ -238,6 +253,7 @@ db.Sequelize = Sequelize;
 module.exports = db;
 ```
 
+## Database Model 정의하기
 
 - docker-compose.yml 파일을 추가한 후, 아래 내용을 입력한다.
 
